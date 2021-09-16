@@ -42,8 +42,9 @@ async function loadJSON() {
 function prepareObjects(jsonData) {
   console.log("JSONDATA", jsonData);
   allAnimals = jsonData.map(prepareObject);
+
   //fixed so we filter and sort on the first load
-  displayList(allAnimals);
+  buildList();
 }
 function prepareObject(jsonObject) {
   const animal = Object.create(Animal);
@@ -178,6 +179,7 @@ function displayAnimal(animal) {
     } else {
       animal.star = true;
     }
+    buildList();
   }
 
   // append clone to list
