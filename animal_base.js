@@ -10,6 +10,7 @@ const Animal = {
   desc: "",
   age: 0,
   star: false,
+  winner: false,
 };
 
 const settings = {
@@ -182,6 +183,112 @@ function displayAnimal(animal) {
     buildList();
   }
 
+  //winners
+  clone.querySelector("[data-field=winner]").dataset.winner = animal.winner;
+  clone.querySelector("[data-field=winner]").addEventListener("click", clickWinner);
+
+  function clickWinner() {
+    console.log("clickWinner", animal.winner);
+    if (animal.winner === true) {
+      animal.winner = false;
+    } else {
+      tryToMakeAWinner(animal);
+    }
+    buildList();
+  }
   // append clone to list
   document.querySelector("#list tbody").appendChild(clone);
+}
+
+function tryToMakeAWinner(selectedAnimal) {
+  console.log("try to make a winner", selectedAnimal);
+
+  const winners = allAnimals.filter((animal) => animal.winner);
+  console.log("winners", winners);
+
+  const numerOfWinners = winners.length;
+
+  //the other selected animals, shift - takes the first selected out
+  const other = winners.filter((animal) => animal.type === selectedAnimal.type).shift();
+  console.log("other", other);
+  //if there is another of the same type
+  //!== not equal to undefined
+  if (other !== undefined) {
+    console.log("There can be only one winner of each type!");
+    removeOther(other);
+  } else if (numerOfWinners >= 2) {
+    console.log("There can only be two winners!");
+    removeAorB(winners[0], winners[1]);
+  } else {
+    console.log("make a winner");
+    makeWinner(selectedAnimal);
+  }
+
+  function removeOther(other) {
+    //ask the user to ignore, or remove "other"
+    document.querySelector("#remove_other").classList.remove("hide");
+    document.querySelector("#remove_other .closebutton").addEventListener("click", closeDialog);
+    document.querySelector("#remove_other #removeother").addEventListener("click", clickRemoveOther);
+
+    //show name on button
+    document.querySelector("#remove_other [data-field=otherWinner]").textContent = other.name;
+
+    //if ignore - do nothing...
+    function closeDialog() {
+      document.querySelector("#remove_other").classList.add("hide");
+      document.querySelector("#remove_other .closebutton").removeEventListener("click", closeDialog);
+      document.querySelector("#remove_other #removeother").removeEventListener("click", clickRemoveOther);
+    }
+    //if remove other
+    function clickRemoveOther() {
+      removeWinner(other);
+      makeWinner(selectedAnimal);
+      buildList();
+      closeDialog();
+    }
+  }
+
+  function removeAorB(winnerA, winnerB) {
+    //ask the user to ignore, or remove A or B
+
+    document.querySelector("#remove_aorb").classList.remove("hide");
+    document.querySelector("#remove_aorb .closebutton").addEventListener("click", closeDialog);
+    document.querySelector("#remove_aorb #removea").addEventListener("click", clickRemoveA);
+    document.querySelector("#remove_aorb #removeb").addEventListener("click", clickRemoveB);
+
+    //show names on buttons
+    document.querySelector("#remove_aorb [data-field=winnerA]").textContent = winnerA.name;
+    document.querySelector("#remove_aorb [data-field=winnerB]").textContent = winnerB.name;
+
+    //if ignore - do nothing...
+    function closeDialog() {
+      document.querySelector("#remove_aorb").classList.add("hide");
+      document.querySelector("#remove_aorb .closebutton").removeEventListener("click", closeDialog);
+      document.querySelector("#remove_aorb #removea").removeEventListener("click", clickRemoveA);
+      document.querySelector("#remove_aorb #removeb").removeEventListener("click", clickRemoveB);
+    }
+
+    function clickRemoveA() {
+      // if removeA:
+      removeWinner(winnerA);
+      makeWinner(selectedAnimal);
+      buildList();
+      closeDialog();
+    }
+
+    function clickRemoveB() {
+      // else - if removeB
+      removeWinner(winnerB);
+      makeWinner(selectedAnimal);
+      buildList();
+      closeDialog();
+    }
+  }
+  function removeWinner(winnerAnimal) {
+    winnerAnimal.winner = false;
+  }
+
+  function makeWinner(animal) {
+    animal.winner = true;
+  }
 }
